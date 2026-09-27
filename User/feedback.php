@@ -1,0 +1,12 @@
+<?php
+require_once __DIR__.'/../includes/functions.php';require_login();$uid=(int)current_user()['user_id'];$errors=[];
+if($_SERVER['REQUEST_METHOD']==='POST') {
+    $type=input('type');$subject=input('subject');$message=input('message');
+    if(!in_array($type,['bug','suggestion','query'],true)) $errors[]='Choose a feedback type.';
+    if(!$subject || mb_strlen($subject)>255) $errors[]='Enter a subject up to 255 characters.';
+    if(mb_strlen($message)<5 || mb_strlen($message)>5000) $errors[]='Write a message from 5 to 5,000 characters.';
+    if(!$errors){db_query('INSERT INTO feedback(user_id,type,subject,message) VALUES(?,?,?,?)',[$uid,$type,$subject,$message]);log_activity($uid,'feedback_sent','feedback',(int)$conn->insert_id);flash('success','Your feedback was sent.');redirect(base_url('User/feedback.php'));}
+}
+$rows=db_all('SELECT * FROM feedback WHERE user_id=? ORDER BY feedback_id DESC',[$uid]);$page_title='Feedback';require __DIR__.'/../includes/user_header.php';
+?>
+<main id="main" class="page"><h1>Feedback</h1><p>Tell us about a problem, suggest an improvement or ask a question.</p><div class="two-column"><form class="panel" method="post"><?=csrf_field()?><?php if($errors):?><div class="errors"><?=e(implode(' ',$errors))?></div><?php endif;?><div class="field"><label for="type">Type</label><select id="type" name="type"><?php foreach(['bug','suggestion','query'] as $type):?><option <?=input('type')===$type?'selected':''?>><?=$type?></option><?php endforeach;?></select></div><div class="field"><label for="subject">Subject</label><input id="subject" name="subject" maxlength="255" required value="<?=e(input('subject'))?>"></div><div class="field"><label for="message">Message</label><textarea id="message" name="message" required minlength="5" maxlength="5000"><?=e(input('message'))?></textarea></div><button class="button">Send feedback</button></form><aside><h2>Your previous feedback</h2><?php foreach($rows as $row):?><article class="panel"><span class="pill"><?=e($row['status'])?></span><h3 style="margin-top:12px"><?=e($row['subject'])?></h3><p><?=nl2br(e($row['message']))?></p><?php if($row['admin_reply']):?><hr><strong>Admin response</strong><p><?=nl2br(e($row['admin_reply']))?></p><?php endif;?></article><?php endforeach;if(!$rows):?><p>No feedback submitted yet.</p><?php endif;?></aside></div></main><?php require __DIR__.'/../includes/footer.php';?>

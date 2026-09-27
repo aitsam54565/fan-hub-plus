@@ -1,0 +1,2 @@
+<footer class="site-footer-simple"><div><strong>Fan Hub Plus</strong><p><?=e(settings()['site_tagline'] ?? 'One universe. Every fandom.')?></p></div><nav aria-label="Footer"><a href="<?=e(base_url('sitemap.php'))?>">Sitemap</a><a href="<?=e(base_url('User/feedback.php'))?>">Feedback</a><a href="<?=e(base_url('chatbot.php'))?>">Help</a><a href="<?=e(base_url('privacy.php'))?>">Privacy</a><a href="<?=e(base_url('Admin/login.php'))?>">Admin</a></nav><small>&copy; <?=date('Y')?> Fan Hub Plus</small></footer>
+</body></html>
